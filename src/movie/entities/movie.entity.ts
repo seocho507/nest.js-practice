@@ -1,1 +1,2 @@
-export class Movie {}
+export class Movie {
+}
