@@ -1,24 +1,12 @@
-import { Exclude, Expose, Transform } from "class-transformer";
+import { Column, Entity } from "typeorm";
+import { DefaultEntity } from "../../common/default.entity";
 
-@Exclude()
-export class Movie {
+@Entity("movies")
+export class Movie extends DefaultEntity {
 
-  private id: number;
+  @Column()
+  title: string;
 
-  @Expose()
-  private title: string;
-
-  @Expose()
-  @Transform(({ value }) => value.toString().toUpperCase())
-  private genre: string;
-
-  private constructor(id: number, title: string, genre: string) {
-    this.id = id;
-    this.title = title;
-    this.genre = genre;
-  }
-
-  public static of(id: number, title: string, genre: string): Movie {
-    return new Movie(id, title, genre);
-  }
+  @Column()
+  genre: string;
 }

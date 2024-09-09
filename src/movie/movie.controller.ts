@@ -34,6 +34,11 @@ export class MovieController {
     return this.movieService.findOne(+id);
   }
 
+  @Get("/search/:title")
+  findManyByTitle(@Param("title") title: string) {
+    return this.movieService.findManyByTitle(title);
+  }
+
   @Patch(":id")
   update(@Param("id") id: string, @Body() updateMovieDto: UpdateMovieDto) {
     return this.movieService.update(+id, updateMovieDto);
