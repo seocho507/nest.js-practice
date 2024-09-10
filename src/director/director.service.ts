@@ -1,26 +1,54 @@
-import { Injectable } from '@nestjs/common';
-import { CreateDirectorDto } from './dto/create-director.dto';
-import { UpdateDirectorDto } from './dto/update-director.dto';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { CreateDirectorDto } from "./dto/create-director.dto";
+import { UpdateDirectorDto } from "./dto/update-director.dto";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Director } from "./entities/director.entity";
+import { Repository } from "typeorm";
 
 @Injectable()
 export class DirectorService {
-  create(createDirectorDto: CreateDirectorDto) {
-    return 'This action adds a new director';
+
+  constructor(
+    @InjectRepository(Director)
+    private readonly directorRepository: Repository<Director>
+  ) {
   }
 
-  findAll() {
-    return `This action returns all director`;
+  async create(createDirectorDto: CreateDirectorDto) {
+    return await this.directorRepository.save(createDirectorDto);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} director`;
+  async findAll() {
+    return this.directorRepository.find();
   }
 
-  update(id: number, updateDirectorDto: UpdateDirectorDto) {
-    return `This action updates a #${id} director`;
+  async findOne(id: number) {
+    return await this.directorRepository.findOne({
+      where: {
+        id
+      }
+    });
+  }
+
+  async findOneByName(name: string) {
+    return await this.directorRepository.findOne({
+      where: {
+        name
+      }
+    });
+  }
+
+  async update(id: number, updateDirectorDto: UpdateDirectorDto) {
+    const director = await this.findOne(id);
+    if (!director) {
+      throw new NotFoundException(`Director with id ${id} not found`);
+    }
+
+    await this.directorRepository.update(id, updateDirectorDto);
+    return await this.findOne(id);
   }
 
   remove(id: number) {
-    return `This action removes a #${id} director`;
+    return this.directorRepository.delete(id);
   }
 }

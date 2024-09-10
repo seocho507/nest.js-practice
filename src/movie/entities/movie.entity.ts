@@ -1,6 +1,7 @@
-import { Column, Entity, JoinColumn, OneToOne } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from "typeorm";
 import { BaseTable } from "../../common/base-table.entity";
 import { MovieDetail } from "./movie-detail.entity";
+import { Director } from "../../director/entities/director.entity";
 
 @Entity("movies")
 export class Movie extends BaseTable {
@@ -19,4 +20,10 @@ export class Movie extends BaseTable {
     })
   @JoinColumn()
   detail: MovieDetail;
+
+  @ManyToOne(
+    () => Director,
+    (director: Director) => director.id
+  )
+  director: Director;
 }
