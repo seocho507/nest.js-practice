@@ -26,7 +26,8 @@ export class DirectorService {
     return await this.directorRepository.findOne({
       where: {
         id
-      }
+      },
+      relations: ["movies"]
     });
   }
 

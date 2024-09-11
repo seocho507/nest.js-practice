@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 export class CreateMovieDto {
 
@@ -13,4 +13,8 @@ export class CreateMovieDto {
   @IsString()
   @IsNotEmpty()
   readonly detail: string;
+
+  @IsNotEmpty()
+  @IsNumber()
+  readonly directorId: number;
 }

@@ -6,6 +6,7 @@ import { Movie } from "./entities/movie.entity";
 import { Like, Repository } from "typeorm";
 import { getLikeStatement } from "./util/utils";
 import { MovieDetail } from "./entities/movie-detail.entity";
+import { Director } from "../director/entities/director.entity";
 
 @Injectable()
 export class MovieService {
@@ -15,7 +16,9 @@ export class MovieService {
     @InjectRepository(Movie)
     private readonly movieRepository: Repository<Movie>,
     @InjectRepository(MovieDetail)
-    private readonly movieDetailRepository: Repository<MovieDetail>
+    private readonly movieDetailRepository: Repository<MovieDetail>,
+    @InjectRepository(Director)
+    private readonly directorRepository: Repository<Director>
   ) {
   }
 
@@ -25,6 +28,16 @@ export class MovieService {
         throw new NotFoundException("Movie already exists with title: " + createMovieDto.title);
       }
     });
+
+    const director = await this.directorRepository.findOne({
+      where: {
+        id: createMovieDto.directorId
+      }
+    });
+
+    if (!director) {
+      throw new NotFoundException("Director not found with id: " + createMovieDto.directorId);
+    }
 
     // Cascade 옵션을 적용하지 않은 경우
     // const movieDetail: MovieDetail = await this.movieDetailRepository.save({
@@ -37,7 +50,8 @@ export class MovieService {
       genre: createMovieDto.genre,
       detail: {
         detail: createMovieDto.detail
-      }
+      },
+      director: director
     }) as Movie;
   }
 
@@ -50,7 +64,7 @@ export class MovieService {
       where: {
         id
       },
-      relations: ["detail"]
+      relations: ["detail", "director"]
     });
   }
 
@@ -80,11 +94,33 @@ export class MovieService {
       throw new NotFoundException("Movie not found with id: " + id);
     }
 
-    const { detail, ...movieInfo } = updateMovieDto;
+    const { detail, directorId, ...movieInfo } = updateMovieDto;
+
+    let directorToUpdate: Director;
+
+    if (directorId) {
+      const director = await this.directorRepository.findOne({
+        where: {
+          id: directorId
+        }
+      });
+
+      if (!director) {
+        throw new NotFoundException("Director not found with id: " + directorId);
+      }
+      directorToUpdate = director;
+    }
+
+    const movieUpdateFields = {
+      ...movieInfo,
+      ...(directorToUpdate && {
+        director: directorToUpdate
+      })
+    };
 
     await this.movieRepository.update(
       id,
-      movieInfo
+      movieUpdateFields
     );
 
     if (detail) {
