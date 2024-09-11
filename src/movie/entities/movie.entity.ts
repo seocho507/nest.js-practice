@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToOne } from "typeorm";
+import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToOne } from "typeorm";
 import { BaseTable } from "../../common/base-table.entity";
 import { MovieDetail } from "./movie-detail.entity";
 import { Director } from "../../director/entities/director.entity";
@@ -18,6 +18,7 @@ export class Movie extends BaseTable {
     () => Genre,
     (genre: Genre) => genre.movies
   )
+  @JoinTable()
   genres: Genre[];
 
   @OneToOne(
