@@ -5,7 +5,9 @@ import { Movie } from "../../movie/entities/movie.entity";
 @Entity("genres")
 export class Genre extends BaseTable {
 
-  @Column()
+  @Column({
+    unique: true
+  })
   name: string;
 
   @ManyToMany(

@@ -45,7 +45,11 @@ export class DirectorService {
       throw new NotFoundException(`Director with id ${id} not found`);
     }
 
-    await this.directorRepository.update(id, updateDirectorDto);
+    const directorUpdateFields = {
+      ...updateDirectorDto
+    };
+
+    await this.directorRepository.update(id, directorUpdateFields);
     return await this.findOne(id);
   }
 
