@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { ArrayNotEmpty, IsArray, IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 export class CreateMovieDto {
 
@@ -8,13 +8,14 @@ export class CreateMovieDto {
 
   @IsString()
   @IsNotEmpty()
-  readonly genre: string;
-
-  @IsString()
-  @IsNotEmpty()
   readonly detail: string;
 
   @IsNotEmpty()
   @IsNumber()
   readonly directorId: number;
+
+  @ArrayNotEmpty()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  readonly genreIds: number[];
 }

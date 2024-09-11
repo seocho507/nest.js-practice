@@ -3,10 +3,11 @@ import { CreateMovieDto } from "./dto/create-movie.dto";
 import { UpdateMovieDto } from "./dto/update-movie.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Movie } from "./entities/movie.entity";
-import { Like, Repository } from "typeorm";
+import { In, Like, Repository } from "typeorm";
 import { getLikeStatement } from "./util/utils";
 import { MovieDetail } from "./entities/movie-detail.entity";
 import { Director } from "../director/entities/director.entity";
+import { Genre } from "../genre/entities/genre.entity";
 
 @Injectable()
 export class MovieService {
@@ -18,7 +19,9 @@ export class MovieService {
     @InjectRepository(MovieDetail)
     private readonly movieDetailRepository: Repository<MovieDetail>,
     @InjectRepository(Director)
-    private readonly directorRepository: Repository<Director>
+    private readonly directorRepository: Repository<Director>,
+    @InjectRepository(Genre)
+    private readonly genreRepository: Repository<Genre>
   ) {
   }
 
@@ -35,9 +38,20 @@ export class MovieService {
       }
     });
 
+    const genres = await this.genreRepository.find({
+      where: {
+        id: In(createMovieDto.genreIds)
+      }
+    });
+
+    if (genres.length !== createMovieDto.genreIds.length) {
+      throw new NotFoundException("Some genres not found with ids: " + createMovieDto.genreIds);
+    }
+
     if (!director) {
       throw new NotFoundException("Director not found with id: " + createMovieDto.directorId);
     }
+
 
     // Cascade 옵션을 적용하지 않은 경우
     // const movieDetail: MovieDetail = await this.movieDetailRepository.save({
@@ -47,11 +61,11 @@ export class MovieService {
     // Cascade 옵션을 적용한 경우
     return await this.movieRepository.save({
       title: createMovieDto.title,
-      genre: createMovieDto.genre,
       detail: {
         detail: createMovieDto.detail
       },
-      director: director
+      director: director,
+      genres: genres
     }) as Movie;
   }
 
@@ -64,7 +78,7 @@ export class MovieService {
       where: {
         id
       },
-      relations: ["detail", "director"]
+      relations: ["detail", "director", "genres"]
     });
   }
 
@@ -94,7 +108,12 @@ export class MovieService {
       throw new NotFoundException("Movie not found with id: " + id);
     }
 
-    const { detail, directorId, ...movieInfo } = updateMovieDto;
+    const {
+      detail,
+      directorId,
+      genreIds,
+      ...movieInfo
+    } = updateMovieDto;
 
     let directorToUpdate: Director;
 
@@ -109,6 +128,22 @@ export class MovieService {
         throw new NotFoundException("Director not found with id: " + directorId);
       }
       directorToUpdate = director;
+    }
+
+    let genresToUpdate: Genre[];
+
+    if (genreIds) {
+      const genres = await this.genreRepository.find({
+        where: {
+          id: In(genreIds)
+        }
+      });
+
+      if (genres.length !== genreIds.length) {
+        throw new NotFoundException("Some genres not found with ids: " + genreIds);
+      }
+
+      genresToUpdate = genres;
     }
 
     const movieUpdateFields = {
@@ -132,7 +167,13 @@ export class MovieService {
       );
     }
 
-    return await this.findOne(id);
+
+    const newMovie = await this.findOne(id);
+    if (genresToUpdate) {
+      newMovie.genres = genresToUpdate;
+    }
+    await this.movieRepository.save(newMovie);
+    return this.findOne(newMovie.id);
   }
 
   async remove(id: number) {

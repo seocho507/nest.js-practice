@@ -16,7 +16,11 @@ export class Movie extends BaseTable {
 
   @ManyToMany(
     () => Genre,
-    (genre: Genre) => genre.movies
+    (genre: Genre) => genre.movies,
+    {
+      cascade: true,
+      nullable: false
+    }
   )
   @JoinTable()
   genres: Genre[];
