@@ -8,6 +8,8 @@ import { Movie } from "./movie/entities/movie.entity";
 import { MovieDetail } from "./movie/entities/movie-detail.entity";
 import { DirectorModule } from "./director/director.module";
 import { Director } from "./director/entities/director.entity";
+import { GenreModule } from "./genre/genre.module";
+import { Genre } from "./genre/entities/genre.entity";
 
 @Module({
   imports: [
@@ -35,14 +37,16 @@ import { Director } from "./director/entities/director.entity";
         entities: [
           Movie,
           MovieDetail,
-          Director
+          Director,
+          Genre
         ],
         synchronize: true
       }),
       inject: [ConfigService]
     }),
     MovieModule,
-    DirectorModule]
+    DirectorModule,
+    GenreModule]
 })
 export class AppModule {
 }
