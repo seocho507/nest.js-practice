@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   UseInterceptors
@@ -30,18 +31,18 @@ export class GenreController {
   }
 
   @Get(":id")
-  findOne(@Param("id") id: string) {
+  findOne(@Param("id", ParseIntPipe) id: number) {
     return this.genreService.findOne(+id);
   }
 
   @Patch(":id")
-  update(@Param("id") id: string,
+  update(@Param("id", ParseIntPipe) id: number,
          @Body() updateGenreDto: UpdateGenreDto) {
     return this.genreService.update(+id, updateGenreDto);
   }
 
   @Delete(":id")
-  remove(@Param("id") id: string) {
+  remove(@Param("id", ParseIntPipe) id: number) {
     return this.genreService.remove(+id);
   }
 }
