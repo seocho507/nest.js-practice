@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   UseInterceptors
@@ -30,8 +31,8 @@ export class MovieController {
   }
 
   @Get(":id")
-  findOne(@Param("id") id: string) {
-    return this.movieService.findOne(+id);
+  findOne(@Param("id", ParseIntPipe) id: number) {
+    return this.movieService.findOne(id);
   }
 
   @Get("/search/:title")
@@ -40,12 +41,13 @@ export class MovieController {
   }
 
   @Patch(":id")
-  update(@Param("id") id: string, @Body() updateMovieDto: UpdateMovieDto) {
-    return this.movieService.update(+id, updateMovieDto);
+  update(@Param("id", ParseIntPipe) id: number,
+         @Body() updateMovieDto: UpdateMovieDto) {
+    return this.movieService.update(id, updateMovieDto);
   }
 
   @Delete(":id")
-  remove(@Param("id") id: string) {
-    return this.movieService.remove(+id);
+  remove(@Param("id", ParseIntPipe) id: number) {
+    return this.movieService.remove(id);
   }
 }
