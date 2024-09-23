@@ -1,8 +1,19 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from "@nestjs/common";
+import {
+  Body,
+  ClassSerializerInterceptor,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseInterceptors
+} from "@nestjs/common";
 import { DirectorService } from "./director.service";
 import { CreateDirectorDto } from "./dto/create-director.dto";
 import { UpdateDirectorDto } from "./dto/update-director.dto";
 
+@UseInterceptors(ClassSerializerInterceptor)
 @Controller("/api/v1/directors")
 export class DirectorController {
   constructor(private readonly directorService: DirectorService) {

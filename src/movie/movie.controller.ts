@@ -34,7 +34,7 @@ export class MovieController {
   @Get(":id")
   findOne(@Param("id", new ParseIntPipe(
     {
-      exceptionFactory: error => new BadRequestException("Id must be a number")
+      exceptionFactory: () => new BadRequestException("Id must be a number")
     }
   )) id: number) {
     return this.movieService.findOne(id);
