@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   ClassSerializerInterceptor,
   Controller,
@@ -31,7 +32,11 @@ export class MovieController {
   }
 
   @Get(":id")
-  findOne(@Param("id", ParseIntPipe) id: number) {
+  findOne(@Param("id", new ParseIntPipe(
+    {
+      exceptionFactory: error => new BadRequestException("Id must be a number")
+    }
+  )) id: number) {
     return this.movieService.findOne(id);
   }
 
