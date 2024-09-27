@@ -1,15 +1,15 @@
-import { CreateDateColumn, PrimaryGeneratedColumn, UpdateDateColumn, VersionColumn } from "typeorm";
+import {CreateDateColumn, PrimaryGeneratedColumn, UpdateDateColumn, VersionColumn} from "typeorm";
 
 export abstract class BaseTable {
-  @PrimaryGeneratedColumn()
-  id: number;
+    @PrimaryGeneratedColumn()
+    id: number;
 
-  @CreateDateColumn()
-  createdAt: Date;
+    @CreateDateColumn()
+    createdAt: Date;
 
-  @UpdateDateColumn()
-  updatedAt: Date;
+    @UpdateDateColumn()
+    updatedAt: Date;
 
-  @VersionColumn()
-  version: number;
+    @VersionColumn()
+    version: number;
 }

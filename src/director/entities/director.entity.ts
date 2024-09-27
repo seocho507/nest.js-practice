@@ -1,22 +1,22 @@
-import { Column, Entity, OneToMany } from "typeorm";
-import { BaseTable } from "../../common/base-table.entity";
-import { Movie } from "../../movie/entities/movie.entity";
+import {Column, Entity, OneToMany} from "typeorm";
+import {BaseTable} from "../../common/base-table.entity";
+import {Movie} from "../../movie/entities/movie.entity";
 
 @Entity("directors")
 export class Director extends BaseTable {
 
-  @Column()
-  name: string;
+    @Column()
+    name: string;
 
-  @Column()
-  dateOfBirth: Date;
+    @Column()
+    dateOfBirth: Date;
 
-  @Column()
-  nationality: string;
+    @Column()
+    nationality: string;
 
-  @OneToMany(
-    () => Movie,
-    (movie: Movie) => movie.director
-  )
-  movies: Movie[];
+    @OneToMany(
+        () => Movie,
+        (movie: Movie) => movie.director
+    )
+    movies: Movie[];
 }
