@@ -1,7 +1,7 @@
 CONTAINER_NAME=postgres
 POSTGRES_USER=shlee
 POSTGRES_PORT=5432
-POSTGRES_VOLUME=/Users/leeseunghwan/dev/postgres:/var/lib/postgresql/data
+POSTGRES_VOLUME=/Users/shlee/dev/postgres:/var/lib/postgresql/data
 POSTGRES_IMAGE=postgres
 
 ask_password:

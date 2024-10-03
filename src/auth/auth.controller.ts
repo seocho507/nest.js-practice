@@ -1,34 +1,50 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import {
+    ClassSerializerInterceptor,
+    Controller,
+    Get,
+    Headers,
+    Post,
+    Request,
+    UseGuards,
+    UseInterceptors
+} from '@nestjs/common';
+import {AuthService} from './auth.service';
+import {LocalAuthGuard} from "./strategy/local.strategy";
+import {JwtAuthGuard} from "./strategy/jwt.strategy";
 
-@Controller('auth')
+@Controller('/api/v1/auth')
+@UseInterceptors(ClassSerializerInterceptor)
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+    constructor(private readonly authService: AuthService) {
+    }
 
-  @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
-  }
+    // authorization : Basic Token
+    @Post("/register")
+    async register(@Headers("authorization") rawToken: string) {
+        return await this.authService.register(rawToken);
+    }
 
-  @Get()
-  findAll() {
-    return this.authService.findAll();
-  }
+    @Post("/login")
+    async login(@Headers("authorization") rawToken: string) {
+        return await this.authService.login(rawToken);
+    }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
-  }
+    @Post("/token/access")
+    async rotateAccessToken(@Request() request) {
+        return {
+            accessToken: await this.authService.issueToken(request.user, false),
+        }
+    }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
-  }
+    @Post("/login/passport")
+    @UseGuards(LocalAuthGuard)
+    async loginPassport(@Request() request) {
+        return request.user;
+    }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
-  }
+    @Get("private")
+    @UseGuards(JwtAuthGuard)
+    async private(@Request() request) {
+        return request.user;
+    }
 }

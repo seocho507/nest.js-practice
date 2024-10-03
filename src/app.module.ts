@@ -10,8 +10,9 @@ import {DirectorModule} from "./director/director.module";
 import {Director} from "./director/entities/director.entity";
 import {GenreModule} from "./genre/genre.module";
 import {Genre} from "./genre/entities/genre.entity";
-import { AuthModule } from './auth/auth.module';
-import { UserModule } from './user/user.module';
+import {AuthModule} from './auth/auth.module';
+import {UserModule} from './user/user.module';
+import {User} from "./user/entities/user.entity";
 
 @Module({
     imports: [
@@ -24,7 +25,12 @@ import { UserModule } from './user/user.module';
                     DB_PORT: Joi.number().required(),
                     DB_USERNAME: Joi.string().required(),
                     DB_PASSWORD: Joi.string().required(),
-                    DB_DATABASE: Joi.string().required()
+                    DB_DATABASE: Joi.string().required(),
+                    HASH_ROUNDS: Joi.number().required(),
+                    ACCESS_TOKEN_SECRET: Joi.string().required(),
+                    ACCESS_TOKEN_EXPIRES: Joi.string().required(),
+                    REFRESH_TOKEN_SECRET: Joi.string().required(),
+                    REFRESH_TOKEN_EXPIRES: Joi.string().required()
                 })
             }
         ),
@@ -40,7 +46,8 @@ import { UserModule } from './user/user.module';
                     Movie,
                     MovieDetail,
                     Director,
-                    Genre
+                    Genre,
+                    User,
                 ],
                 synchronize: true
             }),

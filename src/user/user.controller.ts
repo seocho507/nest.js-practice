@@ -1,34 +1,76 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import {
+    Body,
+    ClassSerializerInterceptor,
+    Controller,
+    Delete,
+    Get,
+    HttpCode,
+    HttpStatus,
+    Param,
+    ParseIntPipe,
+    Patch,
+    Post,
+    UseInterceptors
+} from '@nestjs/common';
+import {UserService} from './user.service';
+import {CreateUserDto} from './dto/create-user.dto';
+import {UpdateUserDto} from './dto/update-user.dto';
+import {User} from "./entities/user.entity";
+import {DeleteResult} from "typeorm";
 
-@Controller('user')
+@UseInterceptors(ClassSerializerInterceptor)
+@Controller("/api/v1/users")
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+    constructor(private readonly userService: UserService) {
+    }
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
-  }
+    @Post()
+    @HttpCode(HttpStatus.CREATED)
+    async create(@Body() createUserDto: CreateUserDto): Promise<User> {
+        try {
+            return await this.userService.create(createUserDto);
+        } catch (error) {
+            throw new Error(`Error creating user: ${error.message}`);
+        }
+    }
 
-  @Get()
-  findAll() {
-    return this.userService.findAll();
-  }
+    @Get()
+    async findAll(): Promise<User[]> {
+        try {
+            return await this.userService.findAll();
+        } catch (error) {
+            throw new Error(`Error fetching users: ${error.message}`);
+        }
+    }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
-  }
+    @Get(':id')
+    async findOne(@Param('id', ParseIntPipe) id: number): Promise<User> {
+        try {
+            return await this.userService.findOne(id);
+        } catch (error) {
+            throw new Error(`Error fetching user with ID ${id}: ${error.message}`);
+        }
+    }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
-  }
+    @Patch(':id')
+    async update(
+        @Param('id', ParseIntPipe) id: number,
+        @Body() updateUserDto: UpdateUserDto
+    ): Promise<User> {
+        try {
+            return await this.userService.update(id, updateUserDto);
+        } catch (error) {
+            throw new Error(`Error updating user with ID ${id}: ${error.message}`);
+        }
+    }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
-  }
+    @Delete(':id')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    async remove(@Param('id', ParseIntPipe) id: number): Promise<DeleteResult> {
+        try {
+            return await this.userService.remove(id);
+        } catch (error) {
+            throw new Error(`Error removing user with ID ${id}: ${error.message}`);
+        }
+    }
 }
