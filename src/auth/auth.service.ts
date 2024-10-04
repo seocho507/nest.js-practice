@@ -136,8 +136,12 @@ export class AuthService {
     }
 
     async issueToken(user: { id: number, role: Role }, isRefreshToken: boolean) {
-        const refreshTokenSecret = this.configService.get<string>(Constant.REFRESH_TOKEN_SECRET);
         const accessTokenSecret = this.configService.get<string>(Constant.ACCESS_TOKEN_SECRET);
+        const accessTokenExpires = this.configService.get<string>(Constant.ACCESS_TOKEN_EXPIRES);
+
+        const refreshTokenSecret = this.configService.get<string>(Constant.REFRESH_TOKEN_SECRET);
+        const refreshTokenExpires = this.configService.get<string>(Constant.REFRESH_TOKEN_EXPIRES);
+
 
         return this.jwtService.signAsync({
             sub: user.id,
@@ -145,7 +149,7 @@ export class AuthService {
             type: isRefreshToken ? Constant.TYPE_REFRESH : Constant.TYPE_ACCESS,
         }, {
             secret: isRefreshToken ? refreshTokenSecret : accessTokenSecret,
-            expiresIn: isRefreshToken ? Constant.REFRESH_TOKEN_EXPIRES : Constant.ACCESS_TOKEN_EXPIRES,
+            expiresIn: isRefreshToken ? refreshTokenExpires : accessTokenExpires,
         })
     }
 
