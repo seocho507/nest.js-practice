@@ -13,6 +13,7 @@ import {Genre} from "./genre/entities/genre.entity";
 import {AuthModule} from './auth/auth.module';
 import {UserModule} from './user/user.module';
 import {User} from "./user/entities/user.entity";
+import {EnvironmentConstant} from "./common/constants/constant-env";
 
 @Module({
     imports: [
@@ -36,12 +37,12 @@ import {User} from "./user/entities/user.entity";
         ),
         TypeOrmModule.forRootAsync({
             useFactory: (configService: ConfigService) => ({
-                type: configService.get<string>("DB_TYPE") as "postgres",
-                host: configService.get<string>("DB_HOST"),
-                port: configService.get<number>("DB_PORT"),
-                username: configService.get<string>("DB_USERNAME"),
-                password: configService.get<string>("DB_PASSWORD"),
-                database: configService.get<string>("DB_DATABASE"),
+                type: configService.get<string>(EnvironmentConstant.DB_TYPE) as "postgres",
+                host: configService.get<string>(EnvironmentConstant.DB_HOST),
+                port: configService.get<number>(EnvironmentConstant.DB_PORT),
+                username: configService.get<string>(EnvironmentConstant.DB_USERNAME),
+                password: configService.get<string>(EnvironmentConstant.DB_PASSWORD),
+                database: configService.get<string>(EnvironmentConstant.DB_DATABASE),
                 entities: [
                     Movie,
                     MovieDetail,

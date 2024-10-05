@@ -5,7 +5,7 @@ import {Repository} from "typeorm";
 import {ConfigService} from "@nestjs/config";
 import {JwtService} from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
-import {Constant} from "../common/constants/constant";
+import {EnvironmentConstant} from "../common/constants/constant-env";
 
 @Injectable()
 export class AuthService {
@@ -67,16 +67,16 @@ export class AuthService {
         try {
             const payload = await this.jwtService.verifyAsync(token, {
                 secret: this.configService.get<string>(
-                    isRefreshToken ? Constant.REFRESH_TOKEN_SECRET : Constant.ACCESS_TOKEN_SECRET,
+                    isRefreshToken ? EnvironmentConstant.REFRESH_TOKEN_SECRET : EnvironmentConstant.ACCESS_TOKEN_SECRET,
                 ),
             });
 
             if (isRefreshToken) {
-                if (payload.type !== Constant.TYPE_REFRESH) {
+                if (payload.type !== EnvironmentConstant.TYPE_REFRESH) {
                     throw new BadRequestException("Refresh 토큰을 입력 해주세요!");
                 }
             } else {
-                if (payload.type !== Constant.TYPE_ACCESS) {
+                if (payload.type !== EnvironmentConstant.TYPE_ACCESS) {
                     throw new BadRequestException("Access 토큰을 입력 해주세요!")
                 }
             }
@@ -101,7 +101,7 @@ export class AuthService {
             throw new BadRequestException("이미 가입한 이메일 입니다!");
         }
 
-        const hash = await bcrypt.hash(password, this.configService.get<number>(Constant.HASH_ROUNDS));
+        const hash = await bcrypt.hash(password, this.configService.get<number>(EnvironmentConstant.HASH_ROUNDS));
 
         await this.userRepository.save({
             email,
@@ -136,17 +136,17 @@ export class AuthService {
     }
 
     async issueToken(user: { id: number, role: Role }, isRefreshToken: boolean) {
-        const accessTokenSecret = this.configService.get<string>(Constant.ACCESS_TOKEN_SECRET);
-        const accessTokenExpires = this.configService.get<string>(Constant.ACCESS_TOKEN_EXPIRES);
+        const accessTokenSecret = this.configService.get<string>(EnvironmentConstant.ACCESS_TOKEN_SECRET);
+        const accessTokenExpires = this.configService.get<string>(EnvironmentConstant.ACCESS_TOKEN_EXPIRES);
 
-        const refreshTokenSecret = this.configService.get<string>(Constant.REFRESH_TOKEN_SECRET);
-        const refreshTokenExpires = this.configService.get<string>(Constant.REFRESH_TOKEN_EXPIRES);
+        const refreshTokenSecret = this.configService.get<string>(EnvironmentConstant.REFRESH_TOKEN_SECRET);
+        const refreshTokenExpires = this.configService.get<string>(EnvironmentConstant.REFRESH_TOKEN_EXPIRES);
 
 
         return this.jwtService.signAsync({
             sub: user.id,
             role: user.role,
-            type: isRefreshToken ? Constant.TYPE_REFRESH : Constant.TYPE_ACCESS,
+            type: isRefreshToken ? EnvironmentConstant.TYPE_REFRESH : EnvironmentConstant.TYPE_ACCESS,
         }, {
             secret: isRefreshToken ? refreshTokenSecret : accessTokenSecret,
             expiresIn: isRefreshToken ? refreshTokenExpires : accessTokenExpires,
