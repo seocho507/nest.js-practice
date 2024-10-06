@@ -18,8 +18,6 @@ export class AuthService {
     }
 
     parseBasicToken(rawToken: string) {
-        /// 1) 토큰을 " " 기준으로 스플릿 한 후 토큰 값만 추출하기
-        /// ["Basic", $token]
         const basicSplit = rawToken.split(" ");
 
         if (basicSplit.length !== 2) {
@@ -32,11 +30,8 @@ export class AuthService {
             throw new BadRequestException("토큰 포맷이 잘못됐습니다!");
         }
 
-        /// 2) 추출한 토큰을 base64 디코딩해서 이메일과 비밀번호로 나눈다.
         const decoded = Buffer.from(token, "base64").toString("utf-8");
 
-        /// "email:password"
-        /// [email, password]
         const tokenSplit = decoded.split(":");
 
         if (tokenSplit.length !== 2) {
