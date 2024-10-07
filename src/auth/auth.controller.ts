@@ -11,7 +11,11 @@ import {
 import {AuthService} from './auth.service';
 import {LocalAuthGuard} from "./strategy/local.strategy";
 import {JwtAuthGuard} from "./strategy/jwt.strategy";
+import {Public} from "./decorator/public.decorator";
+import {ApiBasicAuth, ApiBearerAuth, ApiTags} from "@nestjs/swagger";
+import {Authorization} from "./decorator/authorization.decorator";
 
+@ApiTags("auth")
 @Controller('/api/v1/auth')
 @UseInterceptors(ClassSerializerInterceptor)
 export class AuthController {
@@ -19,13 +23,16 @@ export class AuthController {
     }
 
     // authorization : Basic Token
+    @Public()
     @Post("/register")
-    async register(@Headers("authorization") rawToken: string) {
+    async register(@Authorization() rawToken: string) {
         return await this.authService.register(rawToken);
     }
 
+    @ApiBasicAuth()
+    @Public()
     @Post("/login")
-    async login(@Headers("authorization") rawToken: string) {
+    async login(@Authorization() rawToken: string) {
         return await this.authService.login(rawToken);
     }
 

@@ -14,12 +14,16 @@ async function bootstrap() {
     const config = new DocumentBuilder()
         .setTitle("Movie API")
         .setVersion("1.0")
-        .addBearerAuth()
         .addBasicAuth()
+        .addBearerAuth()
         .build();
 
     const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup("doc", app, document);
+    SwaggerModule.setup("doc", app, document, {
+        swaggerOptions: {
+            persistAuthorization: true,
+        }
+    });
 
     await app.listen(3000);
 }

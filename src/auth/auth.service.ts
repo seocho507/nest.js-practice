@@ -1,5 +1,5 @@
 import {Role, User} from "../user/entities/user.entity";
-import {BadRequestException, Injectable, UnauthorizedException} from "@nestjs/common";
+import {BadRequestException, Injectable, Logger, UnauthorizedException} from "@nestjs/common";
 import {InjectRepository} from "@nestjs/typeorm";
 import {Repository} from "typeorm";
 import {ConfigService} from "@nestjs/config";
@@ -19,7 +19,6 @@ export class AuthService {
 
     parseBasicToken(rawToken: string) {
         const basicSplit = rawToken.split(" ");
-
         if (basicSplit.length !== 2) {
             throw new BadRequestException("토큰 포맷이 잘못됐습니다!");
         }
@@ -136,7 +135,6 @@ export class AuthService {
 
         const refreshTokenSecret = this.configService.get<string>(EnvironmentConstant.REFRESH_TOKEN_SECRET);
         const refreshTokenExpires = this.configService.get<string>(EnvironmentConstant.REFRESH_TOKEN_EXPIRES);
-
 
         return this.jwtService.signAsync({
             sub: user.id,

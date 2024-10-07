@@ -3,9 +3,9 @@ import {BaseTable} from "../../common/base-table.entity";
 import {Exclude} from "class-transformer";
 
 export enum Role {
-    ADMIN = "admin",
-    PAYED_USER = "payedUser",
-    FREE_USER = "freeUser"
+    ADMIN,
+    PAYED_USER,
+    FREE_USER
 }
 
 @Entity("users")

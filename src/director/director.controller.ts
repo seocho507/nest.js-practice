@@ -13,7 +13,9 @@ import {
 import {DirectorService} from "./director.service";
 import {CreateDirectorDto} from "./dto/create-director.dto";
 import {UpdateDirectorDto} from "./dto/update-director.dto";
+import {ApiTags} from "@nestjs/swagger";
 
+@ApiTags("directors")
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller("/api/v1/directors")
 export class DirectorController {

@@ -15,6 +15,9 @@ import {UserModule} from './user/user.module';
 import {User} from "./user/entities/user.entity";
 import {EnvironmentConstant} from "./common/constants/constant-env";
 import {BearerTokenMiddleware} from "./auth/middleware/bearer-token.middleware";
+import {AuthGuard} from "./auth/guard/auth.guard";
+import {APP_GUARD} from "@nestjs/core";
+import {RBACGuard} from "./auth/guard/rbac.guard";
 
 @Module({
     imports: [
@@ -59,14 +62,28 @@ import {BearerTokenMiddleware} from "./auth/middleware/bearer-token.middleware";
         DirectorModule,
         GenreModule,
         AuthModule,
-        UserModule]
+        UserModule],
+    providers: [
+        {
+            provide: APP_GUARD,
+            useClass: AuthGuard
+        },
+        {
+            provide: APP_GUARD,
+            useClass: RBACGuard
+        }
+    ]
 })
+
 export class AppModule implements NestModule {
     configure(consumer: MiddlewareConsumer) {
         consumer.apply(
             BearerTokenMiddleware
         ).exclude({
-            path: "api/v1/auth/*",
+            path: "/api/v1/auth/login",
+            method: RequestMethod.POST
+        }, {
+            path: "/api/v1/auth/register",
             method: RequestMethod.POST
         }).forRoutes("api/v1/*")
     }
