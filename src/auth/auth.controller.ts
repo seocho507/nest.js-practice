@@ -1,18 +1,9 @@
-import {
-    ClassSerializerInterceptor,
-    Controller,
-    Get,
-    Headers,
-    Post,
-    Request,
-    UseGuards,
-    UseInterceptors
-} from '@nestjs/common';
+import {ClassSerializerInterceptor, Controller, Get, Post, Request, UseGuards, UseInterceptors} from '@nestjs/common';
 import {AuthService} from './auth.service';
 import {LocalAuthGuard} from "./strategy/local.strategy";
 import {JwtAuthGuard} from "./strategy/jwt.strategy";
 import {Public} from "./decorator/public.decorator";
-import {ApiBasicAuth, ApiBearerAuth, ApiTags} from "@nestjs/swagger";
+import {ApiBasicAuth, ApiTags} from "@nestjs/swagger";
 import {Authorization} from "./decorator/authorization.decorator";
 
 @ApiTags("auth")
