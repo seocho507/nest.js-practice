@@ -19,7 +19,7 @@ export class BearerTokenMiddleware implements NestMiddleware {
 
         if (!authHeader) {
             next();
-            // return;
+            return;
         }
         const token = this.validateBearerToken(authHeader);
 
