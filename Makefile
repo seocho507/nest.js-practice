@@ -3,6 +3,7 @@ POSTGRES_USER=shlee
 POSTGRES_PORT=5432
 POSTGRES_VOLUME=/Users/shlee/dev/postgres:/var/lib/postgresql/data
 POSTGRES_IMAGE=postgres
+KAFKA_COMPOSE_FILE=docker-compose-kafka.yaml
 
 ask_password:
 	@read -s -p "Enter PostgreSQL password: " POSTGRES_PASSWORD; \
@@ -31,3 +32,9 @@ stop-postgres:
 	@docker stop $(CONTAINER_NAME) || true
 	@docker rm $(CONTAINER_NAME) || true
 	@rm -f .postgres_pass
+
+kafka-up:
+	@docker-compose -f $(KAFKA_COMPOSE_FILE) up -d
+
+kafka-down:
+	@docker-compose -f $(KAFKA_COMPOSE_FILE) down
