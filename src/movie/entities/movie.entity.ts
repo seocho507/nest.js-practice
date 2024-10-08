@@ -1,5 +1,5 @@
 import {Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToOne} from "typeorm";
-import {BaseTable} from "../../common/base-table.entity";
+import {BaseTable} from "../../common/entities/base-table.entity";
 import {MovieDetail} from "./movie-detail.entity";
 import {Director} from "../../director/entities/director.entity";
 import {Genre} from "../../genre/entities/genre.entity";
@@ -44,4 +44,9 @@ export class Movie extends BaseTable {
         }
     )
     director: Director;
+
+    @Column({
+        default: 0
+    })
+    likeCount: number;
 }

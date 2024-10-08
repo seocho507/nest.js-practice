@@ -20,6 +20,8 @@ import {Public} from "../auth/decorator/public.decorator";
 import {RBAC} from "../auth/decorator/rbac.decorator";
 import {Role} from "../user/entities/user.entity";
 import {ApiBearerAuth, ApiTags} from "@nestjs/swagger";
+import {GetMoviesDto} from "./dto/get-movies.dto";
+import {CursorGetMoviesDto} from "./dto/cursor-get-movies.dto";
 
 @ApiTags("movies")
 @UseInterceptors(ClassSerializerInterceptor)
@@ -37,8 +39,27 @@ export class MovieController {
 
     @Public()
     @Get()
-    findAll() {
-        return this.movieService.findAll();
+    findAll(
+        @Body() getMoviesDto: GetMoviesDto
+    ) {
+        return this.movieService.findAll(
+            getMoviesDto.page,
+            getMoviesDto.take,
+            getMoviesDto.title,
+        );
+    }
+
+    @Public()
+    @Get("/cursor")
+    findAllWithCursor(
+        @Body() getMoviesDto: CursorGetMoviesDto
+    ) {
+        return this.movieService.findAllWithCursor(
+            getMoviesDto.id,
+            getMoviesDto.order,
+            getMoviesDto.title,
+            getMoviesDto.take
+        );
     }
 
     @Public()

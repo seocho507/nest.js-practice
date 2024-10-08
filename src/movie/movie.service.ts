@@ -8,7 +8,8 @@ import {getLikeStatement} from "./util/utils";
 import {MovieDetail} from "./entities/movie-detail.entity";
 import {Director} from "../director/entities/director.entity";
 import {Genre} from "../genre/entities/genre.entity";
-import {withTransaction} from "../common/transaction-util";
+import {withTransaction} from "../common/util/transaction-util";
+import {CommonService} from "../common/common.service";
 
 @Injectable()
 export class MovieService {
@@ -23,7 +24,8 @@ export class MovieService {
         private readonly directorRepository: Repository<Director>,
         @InjectRepository(Genre)
         private readonly genreRepository: Repository<Genre>,
-        private readonly dataSource: DataSource
+        private readonly dataSource: DataSource,
+        private readonly commonService: CommonService
     ) {
     }
 
@@ -62,8 +64,45 @@ export class MovieService {
         });
     }
 
-    async findAll() {
-        return await this.movieRepository.find();
+    async findAll(
+        page: number,
+        take: number,
+        title?: string
+    ) {
+        const queryBuilder = this.movieRepository.createQueryBuilder("movie")
+            .leftJoinAndSelect("movie.director", "director")
+            .leftJoinAndSelect("movie.genres", "genres");
+
+        if (title) {
+            const likeStatement = getLikeStatement(title);
+            queryBuilder.where("movie.title LIKE :title", {title: likeStatement});
+        }
+
+        if (page && take) {
+            this.commonService.applyPagePaginationParamsToQueryBuilder(queryBuilder, page, take);
+        }
+
+        const [movies, total] = await queryBuilder.getManyAndCount();
+        return {movies, total};
+    }
+
+    async findAllWithCursor(
+        id: number,
+        order: "ASC" | "DESC",
+        title: string,
+        take: number) {
+        const queryBuilder = this.movieRepository.createQueryBuilder("movie")
+            .leftJoinAndSelect("movie.director", "director")
+            .leftJoinAndSelect("movie.genres", "genres");
+
+        if (title) {
+            const likeStatement = getLikeStatement(title);
+            queryBuilder.andWhere("movie.title LIKE :title", {title: likeStatement});
+        }
+
+        this.commonService.applyCursorPaginationParamsToQueryBuilder(queryBuilder, order, id, take);
+
+        return await queryBuilder.getManyAndCount();
     }
 
     async findOne(id: number) {

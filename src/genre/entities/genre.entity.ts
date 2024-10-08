@@ -1,4 +1,4 @@
-import {BaseTable} from "../../common/base-table.entity";
+import {BaseTable} from "../../common/entities/base-table.entity";
 import {Column, Entity, ManyToMany} from "typeorm";
 import {Movie} from "../../movie/entities/movie.entity";
 
