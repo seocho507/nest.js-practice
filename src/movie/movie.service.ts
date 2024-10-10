@@ -3,7 +3,7 @@ import {CreateMovieDto} from "./dto/create-movie.dto";
 import {UpdateMovieDto} from "./dto/update-movie.dto";
 import {InjectRepository} from "@nestjs/typeorm";
 import {Movie} from "./entities/movie.entity";
-import {DataSource, In, Like, Repository} from "typeorm";
+import {DataSource, In, Like, QueryRunner, Repository} from "typeorm";
 import {getLikeStatement} from "./util/utils";
 import {MovieDetail} from "./entities/movie-detail.entity";
 import {Director} from "../director/entities/director.entity";
@@ -29,39 +29,37 @@ export class MovieService {
     ) {
     }
 
-    async create(createMovieDto: CreateMovieDto) {
-        return withTransaction(this.dataSource, async (qr) => {
-            const director = await qr.manager.findOne(Director, {
-                where: {
-                    id: createMovieDto.directorId
-                }
-            });
-
-            const genres = await qr.manager.find(Genre, {
-                where: {
-                    id: In(createMovieDto.genreIds)
-                }
-            });
-
-            if (genres.length !== createMovieDto.genreIds.length) {
-                throw new NotFoundException("Some genres not found with ids: " + createMovieDto.genreIds);
+    async create(createMovieDto: CreateMovieDto, qr: QueryRunner) {
+        const director = await qr.manager.findOne(Director, {
+            where: {
+                id: createMovieDto.directorId
             }
-
-            if (!director) {
-                throw new NotFoundException("Director not found with id: " + createMovieDto.directorId);
-            }
-
-            const newMovie: Movie = await qr.manager.save(Movie, {
-                title: createMovieDto.title,
-                detail: {
-                    detail: createMovieDto.detail
-                },
-                director: director,
-                genres: genres
-            });
-
-            return newMovie;
         });
+
+        const genres = await qr.manager.find(Genre, {
+            where: {
+                id: In(createMovieDto.genreIds)
+            }
+        });
+
+        if (genres.length !== createMovieDto.genreIds.length) {
+            throw new NotFoundException("Some genres not found with ids: " + createMovieDto.genreIds);
+        }
+
+        if (!director) {
+            throw new NotFoundException("Director not found with id: " + createMovieDto.directorId);
+        }
+
+        const newMovie: Movie = await qr.manager.save(Movie, {
+            title: createMovieDto.title,
+            detail: {
+                detail: createMovieDto.detail
+            },
+            director: director,
+            genres: genres
+        });
+
+        return newMovie;
     }
 
     async findAll(

@@ -10,6 +10,7 @@ import {
     Patch,
     Post,
     Query,
+    Request,
     UseInterceptors
 } from "@nestjs/common";
 import {MovieService} from "./movie.service";
@@ -22,6 +23,7 @@ import {Role} from "../user/entities/user.entity";
 import {ApiBearerAuth, ApiTags} from "@nestjs/swagger";
 import {GetMoviesDto} from "./dto/get-movies.dto";
 import {CursorGetMoviesDto} from "./dto/cursor-get-movies.dto";
+import {TransactionInterceptor} from "../common/interceptor/transaction.interceptor";
 
 @ApiTags("movies")
 @UseInterceptors(ClassSerializerInterceptor)
@@ -31,10 +33,17 @@ export class MovieController {
     }
 
     @ApiBearerAuth()
+    @UseInterceptors(TransactionInterceptor)
     @RBAC(Role.ADMIN)
     @Post()
-    create(@Body() createMovieDto: CreateMovieDto) {
-        return this.movieService.create(createMovieDto);
+    create(
+        @Body() createMovieDto: CreateMovieDto,
+        @Request() request
+    ) {
+        return this.movieService.create(
+            createMovieDto,
+            request.queryRunner
+        );
     }
 
     @Public()
