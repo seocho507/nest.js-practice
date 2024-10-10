@@ -7,6 +7,7 @@ import {MovieDetail} from "./entities/movie-detail.entity";
 import {Director} from "../director/entities/director.entity";
 import {Genre} from "../genre/entities/genre.entity";
 import {CommonModule} from "../common/common.module";
+import {MulterModule} from "@nestjs/platform-express";
 
 @Module(
     {
@@ -17,7 +18,8 @@ import {CommonModule} from "../common/common.module";
                 Director,
                 Genre
             ]),
-            CommonModule
+            CommonModule,
+            MulterModule
         ],
         controllers: [MovieController],
         providers: [MovieService]
