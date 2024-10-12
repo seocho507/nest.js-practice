@@ -16,7 +16,7 @@ export class ForbiddenExceptionFilter implements ExceptionFilter {
                 statusCode: status,
                 timestamp: new Date().toISOString(),
                 path: request.url,
-                message: '권한이 없습니다.',
+                message: '권한이 없습니다!!!',
             })
     }
 }

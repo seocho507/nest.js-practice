@@ -1,48 +1,57 @@
-import {ClassSerializerInterceptor, Controller, Get, Post, Request, UseGuards, UseInterceptors} from '@nestjs/common';
+import {Body, Controller, Post, Request, UseGuards} from '@nestjs/common';
 import {AuthService} from './auth.service';
-import {LocalAuthGuard} from "./strategy/local.strategy";
-import {JwtAuthGuard} from "./strategy/jwt.strategy";
-import {Public} from "./decorator/public.decorator";
-import {ApiBasicAuth, ApiTags} from "@nestjs/swagger";
-import {Authorization} from "./decorator/authorization.decorator";
+import {LocalAuthGuard} from './strategy/local.strategy';
+import {Public} from './decorator/public.decorator';
+import {ApiBasicAuth, ApiBearerAuth, ApiTags} from '@nestjs/swagger';
+import {Authorization} from './decorator/authorization.decorator';
 
-@ApiTags("auth")
-@Controller('/api/v1/auth')
-@UseInterceptors(ClassSerializerInterceptor)
+@Controller('auth')
+@ApiBearerAuth()
+@ApiTags('auth')
 export class AuthController {
     constructor(private readonly authService: AuthService) {
     }
 
-    // authorization : Basic Token
     @Public()
-    @Post("/register")
-    async register(@Authorization() rawToken: string) {
-        return await this.authService.register(rawToken);
-    }
-
     @ApiBasicAuth()
-    @Public()
-    @Post("/login")
-    async login(@Authorization() rawToken: string) {
-        return await this.authService.login(rawToken);
+    @Post('register')
+    registerUser(@Authorization() token: string) {
+        return this.authService.register(token);
     }
 
-    @Post("/token/access")
-    async rotateAccessToken(@Request() request) {
+    @Public()
+    @ApiBasicAuth()
+    @Post('login')
+    loginUser(@Authorization() token: string) {
+        return this.authService.login(token);
+    }
+
+    @Post('token/block')
+    blockToken(
+        @Body('token') token: string,
+    ) {
+        return this.authService.tokenBlock(token);
+    }
+
+    @Post('token/access')
+    async rotateAccessToken(@Request() req) {
         return {
-            accessToken: await this.authService.issueToken(request.user, false),
+            accessToken: await this.authService.issueToken(req.user, false),
         }
     }
 
-    @Post("/login/passport")
     @UseGuards(LocalAuthGuard)
-    async loginPassport(@Request() request) {
-        return request.user;
+    @Post('login/passport')
+    async loginUserPassport(@Request() req) {
+        return {
+            refreshToken: await this.authService.issueToken(req.user, true),
+            accessToken: await this.authService.issueToken(req.user, false),
+        };
     }
 
-    @Get("private")
-    @UseGuards(JwtAuthGuard)
-    async private(@Request() request) {
-        return request.user;
-    }
+    // @UseGuards(JwtAuthGuard)
+    // @Get('private')
+    // async private(@Request() req){
+    //   return req.user;
+    // }
 }

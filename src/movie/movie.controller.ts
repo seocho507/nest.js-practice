@@ -1,5 +1,4 @@
 import {
-    BadRequestException,
     Body,
     ClassSerializerInterceptor,
     Controller,
@@ -10,95 +9,148 @@ import {
     Patch,
     Post,
     Query,
-    Request,
     UseInterceptors
-} from "@nestjs/common";
-import {MovieService} from "./movie.service";
-import {CreateMovieDto} from "./dto/create-movie.dto";
-import {UpdateMovieDto} from "./dto/update-movie.dto";
-import {MovieTitleValidationPipe} from "./pipe/movie-title-validation.pipe";
-import {Public} from "../auth/decorator/public.decorator";
-import {RBAC} from "../auth/decorator/rbac.decorator";
-import {Role} from "../user/entities/user.entity";
-import {ApiBearerAuth, ApiTags} from "@nestjs/swagger";
-import {GetMoviesDto} from "./dto/get-movies.dto";
-import {CursorGetMoviesDto} from "./dto/cursor-get-movies.dto";
-import {TransactionInterceptor} from "../common/interceptor/transaction.interceptor";
+} from '@nestjs/common';
+import {MovieService} from './movie.service';
+import {CreateMovieDto} from './dto/create-movie.dto';
+import {UpdateMovieDto} from './dto/update-movie.dto';
+import {Public} from 'src/auth/decorator/public.decorator';
+import {RBAC} from 'src/auth/decorator/rbac.decorator';
+import {Role} from 'src/user/entities/user.entity';
+import {GetMoviesDto} from './dto/get-movies.dto';
+import {TransactionInterceptor} from 'src/common/interceptor/transaction.interceptor';
+import {UserId} from 'src/user/decorator/user-id.decorator';
+import {QueryRunner} from 'src/common/decorator/query-runner.decorator';
+import {QueryRunner as QR} from 'typeorm';
+import {CacheInterceptor as CI, CacheKey, CacheTTL} from '@nestjs/cache-manager';
+import {Throttle} from 'src/common/decorator/throttle.decorator';
+import {ApiBearerAuth, ApiOperation, ApiResponse, ApiTags} from '@nestjs/swagger';
 
-@ApiTags("movies")
+@Controller('movie')
+@ApiBearerAuth()
+@ApiTags('movie')
 @UseInterceptors(ClassSerializerInterceptor)
-@Controller("/api/v1/movies")
 export class MovieController {
     constructor(private readonly movieService: MovieService) {
     }
 
-    @ApiBearerAuth()
-    @UseInterceptors(TransactionInterceptor)
-    @RBAC(Role.ADMIN)
-    @Post()
-    create(
-        @Body() createMovieDto: CreateMovieDto,
-        @Request() request
-    ) {
-        return this.movieService.create(
-            createMovieDto,
-            request.queryRunner
-        );
-    }
-
-    @Public()
     @Get()
-    findAll(
-        @Body() getMoviesDto: GetMoviesDto
+    @Public()
+    @Throttle({
+        count: 5,
+        unit: 'minute',
+    })
+    @ApiOperation({
+        description: '[Movie]를 Pagination 하는 API'
+    })
+    @ApiResponse({
+        status: 200,
+        description: '성공적으로 API Pagination을 실행 했을때!',
+    })
+    @ApiResponse({
+        status: 400,
+        description: 'Pagination 데이터를 잘못 입력 했을때',
+    })
+    getMovies(
+        @Query() dto: GetMoviesDto,
+        @UserId() userId?: number,
     ) {
-        return this.movieService.findAll(
-            getMoviesDto.page,
-            getMoviesDto.take,
-            getMoviesDto.title,
-        );
+        /// title 쿼리의 타입이 string 타입인지?
+        return this.movieService.findAll(dto, userId);
     }
 
-    @Public()
-    @Get("/cursor")
-    findAllWithCursor(
-        @Body() getMoviesDto: CursorGetMoviesDto
-    ) {
-        return this.movieService.findAllWithCursor(
-            getMoviesDto.id,
-            getMoviesDto.order,
-            getMoviesDto.title,
-            getMoviesDto.take
-        );
+    /// /movie/recent?sdfjiv
+    @Get('recent')
+    @UseInterceptors(CI)
+    @CacheKey('getMoviesRecent')
+    @CacheTTL(1000)
+    getMoviesRecent() {
+        return this.movieService.findRecent();
     }
 
+    /// /movie/askdjfoixcv
+    @Get(':id')
     @Public()
-    @Get(":id")
-    findOne(@Param("id", new ParseIntPipe(
-        {
-            exceptionFactory: () => new BadRequestException("Id must be a number")
-        }
-    )) id: number) {
+    getMovie(
+        @Param('id', ParseIntPipe) id: number,
+    ) {
         return this.movieService.findOne(id);
     }
 
-    @Public()
-    @Get("/search")
-    findManyByTitle(@Query("title", MovieTitleValidationPipe) title: string) {
-        return this.movieService.findManyByTitle(title);
+    @Post()
+    @RBAC(Role.admin)
+    @UseInterceptors(TransactionInterceptor)
+    postMovie(
+        @Body() body: CreateMovieDto,
+        @QueryRunner() queryRunner: QR,
+        @UserId() userId: number,
+    ) {
+        return this.movieService.create(
+            body,
+            userId,
+            queryRunner,
+        );
     }
 
-    @ApiBearerAuth()
-    @RBAC(Role.ADMIN)
-    @Patch(":id")
-    update(@Param("id", ParseIntPipe) id: number,
-           @Body() updateMovieDto: UpdateMovieDto) {
-        return this.movieService.update(id, updateMovieDto);
+    @Patch(':id')
+    @RBAC(Role.admin)
+    patchMovie(
+        @Param('id', ParseIntPipe) id: number,
+        @Body() body: UpdateMovieDto,
+    ) {
+        return this.movieService.update(
+            +id,
+            body,
+        );
     }
 
-    @ApiBearerAuth()
-    @RBAC(Role.ADMIN)
-    @Delete(":id")
-    remove(@Param("id", ParseIntPipe) id: number) {
-        return this.movieService.remove(id);
+    @Delete(':id')
+    @RBAC(Role.admin)
+    deleteMovie(
+        @Param('id', ParseIntPipe) id: number,
+    ) {
+        return this.movieService.remove(
+            +id,
+        );
+    }
+
+    /**
+     * [Like] [Dislike]
+     *
+     * 아무것도 누르지 않은 상태
+     * Like & Dislike 모두 버튼 꺼져있음
+     *
+     * Like 버튼 누르면
+     * Like 버튼 불 켜짐
+     *
+     * Like 버튼 다시 누르면
+     * Like 버튼 불 꺼짐
+     *
+     * Dislike 버튼 누르면
+     * Dislike 버튼 불 켜짐
+     *
+     * Dislike 버튼 다시 누르면
+     * Dislike 버튼 불 꺼짐
+     *
+     * Like 버튼 누름
+     * Like 버튼 불 켜짐
+     *
+     * Dislike 버튼 누름
+     * Like 버튼 불 꺼지고 Dislike 버튼 불 켜짐
+     */
+    @Post(':id/like')
+    createMovieLike(
+        @Param('id', ParseIntPipe) movieId: number,
+        @UserId() userId: number,
+    ) {
+        return this.movieService.toggleMovieLike(movieId, userId, true);
+    }
+
+    @Post(':id/dislike')
+    createMovieDislike(
+        @Param('id', ParseIntPipe) movieId: number,
+        @UserId() userId: number,
+    ) {
+        return this.movieService.toggleMovieLike(movieId, userId, false);
     }
 }

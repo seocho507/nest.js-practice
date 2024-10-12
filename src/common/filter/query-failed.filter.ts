@@ -12,10 +12,10 @@ export class QueryFailedExceptionFilter implements ExceptionFilter {
 
         console.log(exception);
 
-        let message = 'DB Error';
+        let message = '데이터베이스 에러 발생!';
 
         if (exception.message.includes('duplicate key')) {
-            message = '중복된 Key가 존재합니다.';
+            message = '중복 키 에러!';
         }
 
         response.status(status).json({

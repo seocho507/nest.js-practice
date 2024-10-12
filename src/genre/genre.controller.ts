@@ -9,16 +9,16 @@ import {
     Patch,
     Post,
     UseInterceptors
-} from "@nestjs/common";
-import {GenreService} from "./genre.service";
-import {CreateGenreDto} from "./dto/create-genre.dto";
-import {UpdateGenreDto} from "./dto/update-genre.dto";
-import {ApiBearerAuth, ApiTags} from "@nestjs/swagger";
+} from '@nestjs/common';
+import {GenreService} from './genre.service';
+import {CreateGenreDto} from './dto/create-genre.dto';
+import {UpdateGenreDto} from './dto/update-genre.dto';
+import {ApiBearerAuth, ApiTags} from '@nestjs/swagger';
 
-@ApiTags("genres")
+@Controller('genre')
 @ApiBearerAuth()
+@ApiTags('genre')
 @UseInterceptors(ClassSerializerInterceptor)
-@Controller("/api/v1/genres")
 export class GenreController {
     constructor(private readonly genreService: GenreService) {
     }
@@ -33,19 +33,18 @@ export class GenreController {
         return this.genreService.findAll();
     }
 
-    @Get(":id")
-    findOne(@Param("id", ParseIntPipe) id: number) {
-        return this.genreService.findOne(id);
+    @Get(':id')
+    findOne(@Param('id', ParseIntPipe) id: number) {
+        return this.genreService.findOne(+id);
     }
 
-    @Patch(":id")
-    update(@Param("id", ParseIntPipe) id: number,
-           @Body() updateGenreDto: UpdateGenreDto) {
-        return this.genreService.update(id, updateGenreDto);
+    @Patch(':id')
+    update(@Param('id', ParseIntPipe) id: number, @Body() updateGenreDto: UpdateGenreDto) {
+        return this.genreService.update(+id, updateGenreDto);
     }
 
-    @Delete(":id")
-    remove(@Param("id", ParseIntPipe) id: number) {
-        return this.genreService.remove(id);
+    @Delete(':id')
+    remove(@Param('id', ParseIntPipe) id: number) {
+        return this.genreService.remove(+id);
     }
 }

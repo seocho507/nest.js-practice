@@ -1,18 +1,20 @@
-import {BaseTable} from "../../common/entities/base-table.entity";
-import {Column, Entity, ManyToMany} from "typeorm";
-import {Movie} from "../../movie/entities/movie.entity";
+import {BaseTable} from "src/common/entity/base-table.entity";
+import {Movie} from "src/movie/entity/movie.entity";
+import {Column, Entity, ManyToMany, PrimaryGeneratedColumn} from "typeorm";
 
-@Entity("genres")
+@Entity()
 export class Genre extends BaseTable {
+    @PrimaryGeneratedColumn()
+    id: number;
 
     @Column({
-        unique: true
+        unique: true,
     })
     name: string;
 
     @ManyToMany(
         () => Movie,
-        (movie: Movie) => movie.genres
+        movie => movie.genres,
     )
     movies: Movie[];
 }

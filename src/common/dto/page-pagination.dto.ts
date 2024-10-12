@@ -7,5 +7,5 @@ export class PagePaginationDto {
 
     @IsInt()
     @IsOptional()
-    take: number = 20;
+    take: number = 5;
 }

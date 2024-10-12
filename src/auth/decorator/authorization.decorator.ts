@@ -1,8 +1,9 @@
-import {createParamDecorator} from "@nestjs/common";
+import {createParamDecorator, ExecutionContext} from "@nestjs/common";
 
 export const Authorization = createParamDecorator(
-    (data: string, ctx) => {
-        const request = ctx.switchToHttp().getRequest();
-        return request.headers.authorization;
-    },
+    (data: any, context: ExecutionContext) => {
+        const req = context.switchToHttp().getRequest();
+
+        return req.headers['authorization'];
+    }
 );

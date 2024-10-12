@@ -8,6 +8,7 @@ export class CacheInterceptor implements NestInterceptor {
     intercept(context: ExecutionContext, next: CallHandler<any>): Observable<any> | Promise<Observable<any>> {
         const request = context.switchToHttp().getRequest();
 
+        /// GET /movie
         const key = `${request.method}-${request.path}`;
 
         if (this.cache.has(key)) {

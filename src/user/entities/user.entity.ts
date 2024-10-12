@@ -1,32 +1,46 @@
-import {Column, Entity} from "typeorm";
-import {BaseTable} from "../../common/entities/base-table.entity";
 import {Exclude} from "class-transformer";
+import {BaseTable} from "src/common/entity/base-table.entity";
+import {MovieUserLike} from "src/movie/entity/movie-user-like.entity";
+import {Movie} from "src/movie/entity/movie.entity";
+import {Column, Entity, OneToMany, PrimaryGeneratedColumn} from "typeorm";
 
 export enum Role {
-    ADMIN,
-    PAYED_USER,
-    FREE_USER
+    admin,
+    paidUser,
+    user,
 }
 
-@Entity("users")
+@Entity()
 export class User extends BaseTable {
+    @PrimaryGeneratedColumn()
+    id: number;
 
     @Column({
-        unique: true
+        unique: true,
     })
     email: string;
 
     @Column()
     @Exclude({
-        toClassOnly: false,
-        toPlainOnly: true
+        toPlainOnly: true,
     })
     password: string;
 
     @Column({
-        type: "enum",
         enum: Role,
-        default: Role.FREE_USER
+        default: Role.user,
     })
     role: Role;
+
+    @OneToMany(
+        () => Movie,
+        (movie) => movie.creator,
+    )
+    createdMovies: Movie[];
+
+    @OneToMany(
+        () => MovieUserLike,
+        (mul) => mul.user,
+    )
+    likedMovies: MovieUserLike[]
 }
