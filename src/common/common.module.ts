@@ -14,9 +14,6 @@ import {DefaultLogger} from "./logger/default.logger";
     imports: [
         MulterModule.register({
             storage: diskStorage({
-                /// ......./Netflix/public/movie
-                /// process.cwd() + '/public' + '/movie'
-                /// process.cwd() + '\public' + '\movie'
                 destination: join(process.cwd(), 'public', 'temp'),
                 filename: (req, file, cb) => {
                     const split = file.originalname.split('.');
