@@ -69,21 +69,21 @@ export class TasksService {
         console.log('run');
         await this.movieRepository.query(
             `
-UPDATE movie m
-SET "likeCount" = (
-	SELECT count(*) FROM movie_user_like mul
-	WHERE m.id = mul."movieId" AND mul."isLike" = true
-)`
+                UPDATE movie m
+                SET "likeCount" = (SELECT count(*)
+                                   FROM movie_user_like mul
+                                   WHERE m.id = mul."movieId"
+                                     AND mul."isLike" = true)`
         )
 
         await this.movieRepository.query(
             `
-UPDATE movie m
-SET "dislikeCount" = (
-	SELECT count(*) FROM movie_user_like mul
-	WHERE m.id = mul."movieId" AND mul."isLike" = false
-)
-`
+                UPDATE movie m
+                SET "dislikeCount" = (SELECT count(*)
+                                      FROM movie_user_like mul
+                                      WHERE m.id = mul."movieId"
+                                        AND mul."isLike" = false)
+            `
         )
     }
 
